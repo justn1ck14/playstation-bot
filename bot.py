@@ -2,11 +2,10 @@ import asyncio
 import logging
 import requests
 import sqlite3
-import os
 
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 # Твої токени
 API_TOKEN = "8419886191:AAFrzJZuHGOMsa41mGOvpDkzbJnUFGjvG7M"
@@ -15,7 +14,7 @@ RAWG_API_KEY = "78965f8bb8784ff5813c8e065a3d43b3"
 # Логування
 logging.basicConfig(level=logging.INFO)
 
-# Ініціалізація бота та диспетчера
+# Ініціалізація
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
@@ -32,7 +31,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS users (
 conn.commit()
 
 # -------------------------------
-# Базові команди
+# Команди
 # -------------------------------
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
@@ -47,15 +46,12 @@ async def info_command(message: types.Message):
     await message.answer("Я використовую RAWG API, щоб показати популярні ігри для PlayStation.")
 
 # -------------------------------
-# Обробка текстових повідомлень
+# Обробка тексту та фото
 # -------------------------------
 @dp.message(F.text)
 async def echo_message(message: types.Message):
     await message.answer(f"Ти написав: {message.text}")
 
-# -------------------------------
-# Обробка фото
-# -------------------------------
 @dp.message(F.photo)
 async def handle_photo(message: types.Message):
     await message.answer("Фото отримав, але я працюю з іграми 😉")
