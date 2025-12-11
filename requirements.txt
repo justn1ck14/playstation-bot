@@ -1,3 +1,2 @@
 aiogram
 requests
-sqlite3
