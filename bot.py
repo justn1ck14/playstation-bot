@@ -5,7 +5,10 @@ import sqlite3
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    ReplyKeyboardMarkup, KeyboardButton,
+    InlineKeyboardMarkup, InlineKeyboardButton
+)
 
 # Твої токени
 API_TOKEN = "8419886191:AAFrzJZuHGOMsa41mGOvpDkzbJnUFGjvG7M"
@@ -57,22 +60,29 @@ async def handle_photo(message: types.Message):
     await message.answer("Фото отримав, але я працюю з іграми 😉")
 
 # -------------------------------
-# ReplyKeyboard
+# ReplyKeyboard (правильний синтаксис для 3.x)
 # -------------------------------
-menu = ReplyKeyboardMarkup(resize_keyboard=True)
-menu.add(KeyboardButton("Топ ігри PS5"))
-menu.add(KeyboardButton("Топ ігри PS4"))
+menu = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Топ ігри PS5")],
+        [KeyboardButton(text="Топ ігри PS4")]
+    ],
+    resize_keyboard=True
+)
 
 @dp.message(Command("menu"))
 async def show_menu(message: types.Message):
     await message.answer("Оберіть дію:", reply_markup=menu)
 
 # -------------------------------
-# InlineKeyboard
+# InlineKeyboard (правильний синтаксис для 3.x)
 # -------------------------------
-inline_menu = InlineKeyboardMarkup()
-inline_menu.add(InlineKeyboardButton("PS5", callback_data="ps5"))
-inline_menu.add(InlineKeyboardButton("PS4", callback_data="ps4"))
+inline_menu = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="PS5", callback_data="ps5")],
+        [InlineKeyboardButton(text="PS4", callback_data="ps4")]
+    ]
+)
 
 @dp.message(Command("choose"))
 async def choose_console(message: types.Message):
@@ -96,14 +106,17 @@ def get_top_games(platform_id: int, count: int = 5):
         "page_size": count
     }
     response = requests.get(url, params=params).json()
-    return response["results"]
+    return response.get("results", [])
 
 @dp.message(Command("games"))
 async def get_games(message: types.Message):
     games = get_top_games(187, 5)  # PS5
+    if not games:
+        await message.answer("Не вдалося отримати список ігор 😞")
+        return
     reply = "🎮 Топ ігор для PlayStation 5:\n"
     for g in games:
-        reply += f"- {g['name']} (рейтинг: {g['rating']})\n"
+        reply += f"- {g['name']} (рейтинг: {g.get('rating', 'N/A')})\n"
     await message.answer(reply)
 
 # -------------------------------
@@ -111,7 +124,8 @@ async def get_games(message: types.Message):
 # -------------------------------
 @dp.message(Command("save"))
 async def save_user(message: types.Message):
-    cursor.execute("INSERT INTO users (username, platform) VALUES (?, ?)", (message.from_user.username, "PS5"))
+    cursor.execute("INSERT INTO users (username, platform) VALUES (?, ?)",
+                   (message.from_user.username, "PS5"))
     conn.commit()
     await message.answer("Ваш вибір збережено ✅")
 
